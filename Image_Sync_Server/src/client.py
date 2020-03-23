@@ -1,22 +1,37 @@
 import socket
+import os
+ID_PATH = "./client_files/id"
 
 HOST = '127.0.0.1'  # The server's hostname or IP address
 PORT = 2222        # The port used by the server
+
+client_id = -1
+
+if os.path.exists(ID_PATH):
+    client_id_file = open(ID_PATH, mode='r')
+    client_id = int(client_id_file.read(1))
 
 file = open("../test.txt", "rb")
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
     #data = s.recv(1024)
+    # if the client does not have an id it needs to register first and then send data
+    if client_id == -1:
+        s.sendall(b'\x00')
+        client_id = int.from_bytes(s.recv(1), byteorder="big")
+    else:
+        s.sendall(b'\x01')
 
     #startbytes
-    s.send(b'\x00\x03\x02')
-    s.send(b"test.txt")
+    #s.sendall(b'\x00\x03\x02')
+    s.sendall(b"test.txt")
 
     data = file.read(1024)
     while data:
         s.sendall(data)
         data = file.read(1024)
     print("Sending done")
+    s.close()
     # while data:
     #     print("i")
     #     file.write(data)
