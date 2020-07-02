@@ -10,8 +10,8 @@ INDEX_FILE = "../files/fileindex.txt"
 PORT = 5555
 BUFF_SIZE = 2048
 
-stored_files = []
-active_clients = []
+stored_files = []  # each client gets an array with all it's associated files
+active_clients = []  # each element is a list representing an client with the following structure: [Id, Ip, Dirty]
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serversocket.bind((hostName, PORT))
@@ -37,9 +37,9 @@ def read_registered_file():
     else:
         # no -> create a new registered file for upcoming users
         print("Registered File does not exist. Creating...")
-        registered_clients = open(REGISTERED_FILE, mode='c')
-        # registered_clients.write("0")
-        # registered_clients.close()
+        registered_clients = open(REGISTERED_FILE, mode='w+')
+        registered_clients.write("0")
+        registered_clients.close()
         print("...done creating registered file.")
         number_stored_clients = 0
     return number_stored_clients
@@ -77,6 +77,13 @@ def send_file(filename, file_path, client_socket):
     print("Sending file finished.")
 
 
+def mark_clients_as_dirty(new_index):
+    for i in range(0, len(active_clients)):
+        if i != new_index:
+            # mark every client as dirty, meaning that it will get a fresh complete client list next time it connects
+            active_clients[i][2] = True
+
+
 def register_client(csocket, number_registered_clients):
     print("Registering clients", number_registered_clients)
     # increase number of registered clients so we know which ids to expect
@@ -87,7 +94,8 @@ def register_client(csocket, number_registered_clients):
 
     csocket.send(number_registered_clients.to_bytes(1, byteorder='big'))
     print(csocket.getsockname()[0])
-    active_clients.append([number_registered_clients, csocket.getsockname()[0]])
+    active_clients.append([number_registered_clients, csocket.getsockname()[0], False])
+
     print("New client registered. Currently Active Client:", str(active_clients))
     return number_registered_clients
 
@@ -109,6 +117,39 @@ def receive_data(csocket):
 def send_data(csocket):
     return 0
 
+def send_stored_files(client_socket, id):
+    # send the client the information on how many files are sitting on the server
+    number_of_files = str(len(stored_files[id]))
+    client_socket.sendall(number_of_files.encode())
+
+    client_answer = int(client_socket.recv(1).decode())
+    # does the client want to receive the files?
+    if client_answer == 0:
+        # yes -> start sending the files
+        print("Client allows sending of files, initiating packages...")
+        for i in range(len(stored_files[id])-1, -1, -1):
+            stored_file_index = stored_files[id][i]
+            opened_file = open("../files/"+stored_file_index, mode='rb')
+            file_data = opened_file.read(BUFF_SIZE)
+            while file_data:
+                client_socket.sendall(file_data)
+                file_data = opened_file.read(BUFF_SIZE)
+            print("Sent file", stored_file_index, "to client.")
+            opened_file.close()
+            client_file_ack = client_socket.recv(3).decode()
+            if client_file_ack != "ACK":
+                print("ERROR: Client did not send ACK BACK, therefore stopping transmission of files")
+                break
+            else:
+                # transmission successfully, therefore deleting the files locally
+                #os.remove("../files/"+stored_file_index) TODO WIEDER EINFÜGEN
+                stored_files[id].pop(i)
+        print("Done sending files to client.")
+    else:
+        # no -> do nothing
+        print("Client did not allow to send files.")
+        return None
+
 
 def send_all_registered_devices(client_socket):
     clients_array = str(0) + str(active_clients)
@@ -117,13 +158,14 @@ def send_all_registered_devices(client_socket):
     client_socket.sendall(sending_data)
     return
 
+
 def delete_sent_files(csocket):
     print("Deleting files")
     return 0
 
 
 number_registered_clients = read_registered_file()
-
+read_index_file()
 print("Entering listening mode")
 while True:
 
@@ -131,18 +173,27 @@ while True:
     with clientsocket:
         print("Found a client. Setting up connection")
         # what kind of interaction
-        initial_send = int.from_bytes(clientsocket.recv(1), byteorder='big')
-
+        c_initial_send = clientsocket.recv(2).decode()
+        initial_send = int(c_initial_send[0])#int.from_bytes(c_initial_send[0], byteorder='big')
+        client_id = int(c_initial_send[1])
         print("Initial byte", initial_send)
 
-        if initial_send == 0:
+        if int(initial_send) == 0:
             # register
             number_registered_clients = register_client(clientsocket, number_registered_clients)
             send_all_registered_devices(clientsocket)
-        elif initial_send == 1:
-            # first send files to client and then receive files from client
+        elif int(initial_send) == 1:
+            for i in range(0, client_id):
+                active_clients.append([i, "0", False])
+            active_clients.append([client_id, clientsocket.getsockname()[0], True])
+            # is the client marked as dirty?
+            #if active_clients[client_id][2]:
+                # yes -> send the complete client list and mark as not dirty anymore
             send_all_registered_devices(clientsocket)
-            send_data(clientsocket)
+                #active_clients[client_id][2] = False
+            client_file_request = int(clientsocket.recv(1).decode())
+            if client_file_request == 0:
+                send_stored_files(clientsocket, client_id)
             receive_data(clientsocket)
         # [id, send to phone/pc, how many images sent]
         # client_auth = clientsocket.recv(3)
