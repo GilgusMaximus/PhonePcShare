@@ -2,8 +2,8 @@ import socket
 import os
 ID_PATH = "./client_files/id"
 
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 2222        # The port used by the server
+HOST = '127.0.0.1'#'192.168.178.3'  # The server's hostname or IP address
+PORT = 5555        # The port used by the server
 
 client_id = -1
 
@@ -22,6 +22,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     else:
         s.sendall(b'\x01')
 
+    print(client_id)
+    data = s.recv(2048)
+    stringer = ""
+    # receive the client list
+    while data:
+        stringer = data.decode()
+        if len(data) < 2048:
+            # either 0 or end of data
+            break
+        data = s.recv(2048)
+    if stringer[0] != "0":
+        print("ERROR: No acknowledgement before client list")
+        SystemExit(-1)
+    client_list = stringer[1:]
+    print("Clientlist:", client_list)
     #startbytes
     #s.sendall(b'\x00\x03\x02')
     s.sendall(b"test.txt")
