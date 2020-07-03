@@ -28,7 +28,7 @@ def read_registered_file():
         # yes -> read all users as well as the total number of users
         print("Registered File exists. reading...")
         registered_clients = open(REGISTERED_FILE, mode='r')
-        number_stored_clients = int(registered_clients.read(1))
+        number_stored_clients = int(registered_clients.read(3))
         registered_clients.close()
         # create as many file lists as there are total registered users
         for i in range(0, number_stored_clients):
