@@ -81,6 +81,18 @@ def read_index_file():
         print("...done reading Index File")
 
 
+def write_index_file():
+    if not os.path.exists(INDEX_FILE):
+        open_file = open(INDEX_FILE, mode='w+', encoding='utf-8')
+    else:
+        open_file = open(INDEX_FILE, mode='w')
+    for j in range(0, len(stored_files)):
+        curr_array = stored_files[j]
+        if len(curr_array) > 0:
+            for file in curr_array:
+                open_file.writelines(str(j) + " " + file)
+
+
 # registers a new client in the system and updates the number of registered users
 def register_client(csocket, number_registered_clients):
     print("Registering clients", number_registered_clients)
@@ -228,3 +240,4 @@ while True:
             receive_files_from_client(clientsocket)
 
         clientsocket.close()
+        write_index_file()
