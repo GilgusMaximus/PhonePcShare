@@ -109,7 +109,7 @@ def receive_file(c_socket, filename, filepath):
         opened_file.write(file_data)
         # if the client sent less than the maximum size of data, then the client is done sending, so break out of loop
         if len(file_data) < BUFF_SIZE:
-            opened_file.write(file_data)
+            #opened_file.write(file_data)
             break
         file_data = c_socket.recv(BUFF_SIZE)
     opened_file.close()
@@ -123,14 +123,22 @@ def receive_files_from_client(c_socket):
     if int(client_send_info[0]) != 1:
         print("ERROR: Client sent wrong initiation. Closing client.")
         c_socket.close()
-    number_of_files = int(client_send_info[1])
-    file_name_array = eval(client_send_info[2:])
+
+    file_receiver_id = int(client_send_info[1])
+    if file_receiver_id > number_registered_clients:
+        print("ERROR: Client sent wrong receiver ID. ID does not exist. Closing client.")
+        c_socket.close()
+
+    number_of_files = int(client_send_info[2])
+    file_name_array = eval(client_send_info[3:])
     # server should send a 0 byte to signal that everything is ok
     send_single_message_to_client(c_socket, str(0))
     # receive the files and after each file send an ACK message to the client to let it know, the server got the file
     for j in range(0, number_of_files):
         receive_file(c_socket, file_name_array[j], STORED_FILES_PATH)
         send_single_message_to_client(c_socket, "ACK")
+        # add the file to the list of stored files for the other device
+        stored_files[file_receiver_id].append(file_name_array[j])
     print("Received all files successfully.")
 
 
@@ -205,9 +213,10 @@ while True:
             send_all_registered_devices(clientsocket)
             #continue
         elif int(initial_send) == 1:
-            for i in range(0, client_id):
-                active_clients.append([i, "0", False])
-            active_clients.append([client_id, clientsocket.getsockname()[0], True])
+            if len(active_clients) < client_id:
+                for i in range(0, client_id):
+                    active_clients.append([i, "0", False])
+                active_clients.append([client_id, clientsocket.getsockname()[0], True])
             # is the client marked as dirty?
             #if active_clients[client_id][2]:
                 # yes -> send the complete client list and mark as not dirty anymore
