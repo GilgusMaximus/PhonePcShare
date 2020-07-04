@@ -1,5 +1,6 @@
 import socket
 import os
+import time
 
 ID_PATH = "./client_files/id"
 
@@ -54,7 +55,7 @@ def download_files_from_server(c_socket):
     file_counter = 0
     print("Requested file download from server...")
     # send the request to receive files
-    c_socket.sendall(str(0).encode())
+    send_single_message_to_server(c_socket, str(0))
 
     # receive the information about the queued files
     server_message = receive_messages_from_server(c_socket)
@@ -84,7 +85,7 @@ def download_files_from_server(c_socket):
 def send_file_to_server(c_socket, filepath, filename):
     if os.path.exists(filepath):
         # send the server the name of the file
-        send_single_message_to_server(client_socket, filename)
+        #send_single_message_to_server(c_socket, filename)
         print("File found. Start sending...")
         open_file = open(filepath, mode='rb')
         file_data = open_file.read(BUFFER_SIZE)
@@ -96,6 +97,58 @@ def send_file_to_server(c_socket, filepath, filename):
         print("ERROR: File under path", filepath, "was not found. Aborting sending of file.")
 
 
+# wrapper function around the actual sending, which handles the messages that are being send for the acknowledgements
+def send_files_to_server(c_socket, filepaths, filenames):
+    # send the server the info 'sending' and how many files the client wants to send
+    send_single_message_to_server(c_socket, str(1)+str(len(filepaths))+str(filenames))
+    server_response = receive_messages_from_server(c_socket)
+    if int(server_response) == 0:
+        for i in range(0, len(filepaths)):
+            curr_filepath = filepaths[i]
+            curr_filename = filenames[i]
+            send_file_to_server(c_socket, curr_filepath, curr_filename)
+            server_file_response = receive_messages_from_server(c_socket)
+            if server_file_response != "ACK":
+                print("ERROR: Server did not acknowledge file.", str(i-1), "out of", str(len(filepaths)), "sent successfully. Aborting remaining sending process.")
+                break
+
+
+def connection_setup():
+    global CLIENT_ID
+    global CLIENT_ALREADY_REGISTERED
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((HOST, PORT))
+        # did the client already connect to the server and save an assigned id?
+        if CLIENT_ID == -1:
+            # no -> send server the information that a new client id must be issued
+            send_string = str(0) + str(1)
+            send_single_message_to_server(client_socket, send_string)
+            CLIENT_ID = int.from_bytes(client_socket.recv(1), byteorder="big")
+        #else:
+        #    # yes -> send the server the information that the client already registered as well as the assigned id
+         #   send_string = str(1) + str(CLIENT_ID)
+         #   send_single_message_to_server(client_socket, send_string)
+         #   CLIENT_ALREADY_REGISTERED = True
+
+
+def main_routine():
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((HOST, PORT))
+            send_string = str(1) + str(CLIENT_ID)
+            send_single_message_to_server(client_socket, send_string)
+
+            client_list = receive_client_list_from_server(client_socket)
+            print("Client list:", client_list)
+
+            download_files_from_server(client_socket)
+            # send the server the test file
+            send_file_to_server(client_socket, "../test.txt", "test234.txt")
+            print("Waiting for 10s until new connect.")
+        time.sleep(10)
+
+
 #####################################################################################################################
 #                                           Start of the main routine
 #####################################################################################################################
@@ -103,7 +156,8 @@ if os.path.exists(ID_PATH):
     client_id_file = open(ID_PATH, mode='r')
     CLIENT_ID = int(client_id_file.read(1))
 
-file = open("../test.txt", "rb")
+#connection_setup()
+#main_routine()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
     client_socket.connect((HOST, PORT))
@@ -119,27 +173,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         send_single_message_to_server(client_socket, send_string)
         CLIENT_ALREADY_REGISTERED = True
 
-    client_list = receive_client_list_from_server(client_socket)
+    client_list = eval(receive_client_list_from_server(client_socket))
     print("Client list:", client_list)
     if CLIENT_ALREADY_REGISTERED:
         download_files_from_server(client_socket)
-    # send the server the test file
-    send_file_to_server(client_socket, "../test.txt", "test.txt")
 
-    # data = file.read(BUFFER_SIZE)
-    # while data:
-    #     client_socket.sendall(data)
-    #     data = file.read(BUFFER_SIZE)
-    # print("Sending done")
-    # client_sock
-    #
-    #
-    #
-    # et.close()
-    # while data:
-    #     print("i")
-    #     file.write(data)
-    #     data = s.recv(1024)
-    # file.close()
+    # send the server the files
+    send_files_to_server(client_socket, ["../test.txt"], ["test23224.txt"])
 
-# print('Received', repr(data))
