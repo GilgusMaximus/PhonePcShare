@@ -1,6 +1,8 @@
 import socket
 import os
 import time
+import tkinter as tk
+import threading
 
 ID_PATH = "./client_files/id"
 
@@ -113,6 +115,8 @@ def send_files_to_server(c_socket, filepaths, filenames, receiver_id):
                 break
 
 
+def pti():
+    print("hi")
 #####################################################################################################################
 #                                           Start of the main routine
 #####################################################################################################################
