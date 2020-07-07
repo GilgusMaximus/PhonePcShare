@@ -164,6 +164,7 @@
       <workItem from="1594045634459" duration="44000" />
       <workItem from="1594045694877" duration="3268000" />
       <workItem from="1594059221566" duration="2663000" />
+      <workItem from="1594146014280" duration="1412000" />
     </task>
     <servers />
   </component>
@@ -187,22 +188,22 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="740" y="295" width="999" height="646" key="FileChooserDialogImpl/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594045673244" />
-    <state width="1877" height="265" key="GridCell.Tab.0.bottom" timestamp="1594063036734">
+    <state width="1877" height="265" key="GridCell.Tab.0.bottom" timestamp="1594147428638">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="265" key="GridCell.Tab.0.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594063036734" />
-    <state width="1877" height="265" key="GridCell.Tab.0.center" timestamp="1594063036734">
+    <state width="1877" height="265" key="GridCell.Tab.0.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594147428638" />
+    <state width="1877" height="265" key="GridCell.Tab.0.center" timestamp="1594147428638">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="265" key="GridCell.Tab.0.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594063036734" />
-    <state width="1877" height="265" key="GridCell.Tab.0.left" timestamp="1594063036734">
+    <state width="1877" height="265" key="GridCell.Tab.0.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594147428638" />
+    <state width="1877" height="265" key="GridCell.Tab.0.left" timestamp="1594147428638">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="265" key="GridCell.Tab.0.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594063036734" />
-    <state width="1877" height="265" key="GridCell.Tab.0.right" timestamp="1594063036734">
+    <state width="1877" height="265" key="GridCell.Tab.0.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594147428638" />
+    <state width="1877" height="265" key="GridCell.Tab.0.right" timestamp="1594147428638">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="265" key="GridCell.Tab.0.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594063036734" />
+    <state width="1877" height="265" key="GridCell.Tab.0.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594147428638" />
     <state width="1877" height="376" key="GridCell.Tab.1.bottom" timestamp="1594049473912">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
@@ -247,7 +248,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Image_Sync_Server$server.coverage" NAME="server Coverage Results" MODIFIED="1593894826255" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/Image_Sync_Server$client_gui.coverage" NAME="client_gui Coverage Results" MODIFIED="1594062984506" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/Image_Sync_Server$client_gui.coverage" NAME="client_gui Coverage Results" MODIFIED="1594147039143" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/Image_Sync_Server$client.coverage" NAME="client Coverage Results" MODIFIED="1593970822807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>
