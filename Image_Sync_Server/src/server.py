@@ -28,6 +28,7 @@ def receive_message_from_client(c_socket):
             # end of data
             break
         client_data_raw = c_socket.recv(BUFF_SIZE)
+    print("> Received message from client:", client_data_decoded)
     return client_data_decoded
 
 
@@ -170,11 +171,10 @@ def send_file(filename, file_path, client_socket):
 
 # wrapper function around the send_file function, which handles the messages that are send between client and server
 def send_stored_files(client_socket, c_id):
-    # send the client the information on how many files are sitting on the server
-    number_of_files = str(len(stored_files[c_id]))
-    send_single_message_to_client(client_socket, number_of_files)
-
+    # send the client the array with the file names
+    send_single_message_to_client(client_socket,str(stored_files[c_id]))
     client_answer = int(receive_message_from_client(client_socket))
+
     # does the client want to receive the files?
     if client_answer == 0:
         # yes -> start sending the files

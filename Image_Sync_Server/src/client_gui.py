@@ -7,6 +7,7 @@ USER_DEFINED_STORE_PATH = "../client_files/"
 WAIT_TO_SYNC_TIME = 10
 SEND_PRESSED = False
 
+
 # adds the received files to the history and deletes any over the maximum displayable size of the listbox
 def add_elements_to_receive_history(file_names, list_box):
     size = list_box.size()
@@ -30,7 +31,10 @@ def run(lb_tops):
         # check for incoming files
         if time_counter == WAIT_TO_SYNC_TIME:
             time_counter = 0
-            client.update_download_client_list()
+            new_files = client.update_download_client_list()
+            # if the client actually downloaded some files, then the UI has to update
+            if len(new_files) > 0:
+                add_elements_to_receive_history(new_files, lb_tops)
         # used for waiting WAIT_TO_SYNC_TIME seconds, except when the user wants to send files, then it should also perform that
         else:
             if SEND_PRESSED:
