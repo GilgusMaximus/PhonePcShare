@@ -1,11 +1,11 @@
 import threading
 import tkinter as tk
 import time
-#import src.client as client
+import src.client as client
 
-USER_DEFINED_STORE_PATH = "../c_files/"
+USER_DEFINED_STORE_PATH = "../client_files/"
 WAIT_TO_SYNC_TIME = 10
-
+SEND_PRESSED = False
 
 # adds the received files to the history and deletes any over the maximum displayable size of the listbox
 def add_elements_to_receive_history(file_names, list_box):
@@ -24,15 +24,19 @@ def add_elements_to_receive_history(file_names, list_box):
 def run(lb_tops):
     print(lb_tops.size())
     time_counter = 0
+    client.setup_client()
     while True:
         print("running...")
         # check for incoming files
         if time_counter == WAIT_TO_SYNC_TIME:
             time_counter = 0
+            client.update_download_client_list()
         # used for waiting WAIT_TO_SYNC_TIME seconds, except when the user wants to send files, then it should also perform that
         else:
-            time.sleep(1)
+            if SEND_PRESSED:
+                client.file_send_setup(None, None, None)
             time_counter += 1
+            time.sleep(1)
 
 
 window = tk.Tk()

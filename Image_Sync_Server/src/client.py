@@ -1,17 +1,14 @@
 import socket
 import os
-import time
-import tkinter as tk
-import threading
 
-ID_PATH = "./client_files/id"
+ID_PATH = "id.txt"
 
 HOST = '127.0.0.1'  # '192.168.178.3'  # The server's hostname or IP address
 PORT = 5555  # The port used by the server
 BUFFER_SIZE = 2048
 CLIENT_ID = 1
 CLIENT_LIST = []
-CLIENT_FILES_STORE_LOCATION = "../c_files/"
+CLIENT_FILES_STORE_LOCATION = "../client_files/"
 CLIENT_ALREADY_REGISTERED = False
 
 def receive_messages_from_server(c_socket):
@@ -115,36 +112,67 @@ def send_files_to_server(c_socket, filepaths, filenames, receiver_id):
                 break
 
 
-def pti():
-    print("hi")
+# TODO make it writing a settings file
+def write_id_file(c_id):
+    id_file = open(CLIENT_FILES_STORE_LOCATION+ID_PATH, mode='w+')
+    id_file.write(c_id)
+
+
 #####################################################################################################################
 #                                           Start of the main routine
 #####################################################################################################################
-if os.path.exists(ID_PATH):
-    client_id_file = open(ID_PATH, mode='r')
-    CLIENT_ID = int(client_id_file.read(1))
-
-
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-    client_socket.connect((HOST, PORT))
-    # did the client already connect to the server and save an assigned id?
-    if CLIENT_ID == -1:
-        # no -> send server the information that a new client id must be issued
-        send_string = str(0) + str(1)
-        send_single_message_to_server(client_socket, send_string)
-        CLIENT_ID = int.from_bytes(client_socket.recv(1), byteorder="big")
+# read the client id or register the client at the server
+def setup_client():
+    global CLIENT_ID
+    global CLIENT_LIST
+    if os.path.exists(ID_PATH):
+        client_id_file = open(ID_PATH, mode='r')
+        CLIENT_ID = int(client_id_file.read(1))
     else:
-        # yes -> send the server the information that the client already registered as well as the assigned id
-        send_string = str(1) + str(CLIENT_ID)
-        send_single_message_to_server(client_socket, send_string)
-        CLIENT_ALREADY_REGISTERED = True
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((HOST, PORT))
+            send_single_message_to_server(client_socket, str(0)+str(1))
+            CLIENT_ID = receive_messages_from_server(client_socket)
+            write_id_file(CLIENT_ID)
 
-    client_list = eval(receive_client_list_from_server(client_socket))
-    print("Client list:", client_list)
-    if CLIENT_ALREADY_REGISTERED:
+
+# function used to check whether files are available for download and whether new clients are available
+def update_download_client_list():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((HOST, PORT))
+        send_single_message_to_server(client_socket, str(2)+str(CLIENT_ID))
+        receive_client_list_from_server(client_socket)
         download_files_from_server(client_socket)
 
-    # send the server the files
-    send_files_to_server(client_socket, ["../test.txt"], ["test23224.txt"], 1)
+
+# setup the socket for sending files and call the respective function
+def file_send_setup(filepaths, filenames ,receiver_id):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((HOST, PORT))
+        send_single_message_to_server(client_socket, str(1)+str(CLIENT_ID))
+        send_files_to_server(client_socket, filepaths=filepaths, filenames=filenames, receiver_id=receiver_id)
+
+
+# with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+#     client_socket.connect((HOST, PORT))
+#     # did the client already connect to the server and save an assigned id?
+#     if CLIENT_ID == -1:
+#         # no -> send server the information that a new client id must be issued
+#         send_string = str(0) + str(1)
+#         send_single_message_to_server(client_socket, send_string)
+#         CLIENT_ID = int.from_bytes(client_socket.recv(1), byteorder="big")
+#     else:
+#         # yes -> send the server the information that the client already registered as well as the assigned id
+#         send_string = str(1) + str(CLIENT_ID)
+#         send_single_message_to_server(client_socket, send_string)
+#         CLIENT_ALREADY_REGISTERED = True
+#
+#     client_list = eval(receive_client_list_from_server(client_socket))
+#     print("Client list:", client_list)
+#     if CLIENT_ALREADY_REGISTERED:
+#         download_files_from_server(client_socket)
+#
+#     # send the server the files
+#     send_files_to_server(client_socket, ["../test.txt"], ["test23224.txt"], 1)
 
 

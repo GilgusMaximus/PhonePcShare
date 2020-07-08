@@ -215,7 +215,7 @@ while True:
         print("Found a client. Setting up connection")
         # what kind of interaction
         c_initial_send = receive_message_from_client(clientsocket)
-        initial_send = int(c_initial_send[0])#int.from_bytes(c_initial_send[0], byteorder='big')
+        initial_send = int(c_initial_send[0])
         client_id = int(c_initial_send[1])
         print("Initial byte", initial_send)
 
@@ -223,21 +223,18 @@ while True:
             # register
             number_registered_clients = register_client(clientsocket, number_registered_clients)
             send_all_registered_devices(clientsocket)
-            #continue
-        elif int(initial_send) == 1:
-            if len(active_clients) < client_id:
-                for i in range(0, client_id):
-                    active_clients.append([i, "0", False])
-                active_clients.append([client_id, clientsocket.getsockname()[0], True])
-            # is the client marked as dirty?
-            #if active_clients[client_id][2]:
-                # yes -> send the complete client list and mark as not dirty anymore
-            send_all_registered_devices(clientsocket)
-                #active_clients[client_id][2] = False
-            client_file_request = int(receive_message_from_client(clientsocket))
-            if client_file_request == 0:
-                send_stored_files(clientsocket, client_id)
-            receive_files_from_client(clientsocket)
 
+        elif int(initial_send) == 1:
+            # receive files
+            #send_all_registered_devices(clientsocket)
+
+            #client_file_request = int(receive_message_from_client(clientsocket))
+            #if client_file_request == 0:
+            #    send_stored_files(clientsocket, client_id)
+            receive_files_from_client(clientsocket)
+        elif int(initial_send) == 2:
+            # send files
+            send_all_registered_devices(clientsocket)
+            send_stored_files(clientsocket, client_id)
         clientsocket.close()
         write_index_file()
