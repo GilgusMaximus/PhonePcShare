@@ -62,7 +62,7 @@ def download_files_from_server(c_socket):
     send_single_message_to_server(c_socket, str(0))
     # for the number of files available, each time receive the data and write it into a file
     for i in range(0, len(download_file_names)):
-        curr_file = open(CLIENT_FILES_STORE_LOCATION + str(file_counter) + ".txt", mode='wb+')
+        curr_file = open(CLIENT_FILES_STORE_LOCATION + download_file_names[i] + ".txt", mode='wb+')
         file_counter += 1
         server_data = c_socket.recv(BUFFER_SIZE)
         # receive the client list
