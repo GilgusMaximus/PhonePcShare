@@ -15,4 +15,4 @@ When using the server mode of the client, this buffering is only possible when t
 
 Currently the dektop client and the server are in development and the Android application will follow as soon as these two are usable.
 
-##Important information: At this stage, everything is sent in plain text through the network. There is no encryption going on, so that you should not send critial file via this system.
+#Important information: At this stage, everything is sent in plain text through the network. There is no encryption going on, so that you should not send critial files via this system.
