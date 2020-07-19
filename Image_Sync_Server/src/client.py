@@ -94,6 +94,7 @@ def send_file_to_server(c_socket, filepath):
             c_socket.sendall(file_data)
             file_data = open_file.read(BUFFER_SIZE)
         print("...sending done.")
+        open_file.close()
     else:
         print("ERROR: File under path", filepath, "was not found. Aborting sending of file.")
 
@@ -124,18 +125,30 @@ def write_id_file(c_id):
 #                                           Start of the main routine
 #####################################################################################################################
 # read the client id or register the client at the server
-def setup_client():
+def setup_client(device_name):
     global CLIENT_ID
     global CLIENT_LIST
     if os.path.exists(CLIENT_FILES_STORE_LOCATION+ID_PATH):
         client_id_file = open(CLIENT_FILES_STORE_LOCATION+ID_PATH, mode='r')
-        CLIENT_ID = int(client_id_file.read(1))
+        read_string = client_id_file.read(1)
+        client_id_file.close()
+        # check if the read file was empty or not
+        if read_string == "":
+            # if the file was empty, no id was read -> therefore delete the file and restart the setup
+            os.remove(CLIENT_FILES_STORE_LOCATION+ID_PATH)
+            setup_client(device_name)
+        else:
+            CLIENT_ID = int(read_string)
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((HOST, PORT))
             send_single_message_to_server(client_socket, str(0)+str(1))
             CLIENT_ID = receive_messages_from_server(client_socket)
+            print("IDIDIDIDI:", CLIENT_ID)
             write_id_file(CLIENT_ID)
+            send_single_message_to_server(client_socket, device_name)
+            if receive_messages_from_server(client_socket) != device_name:
+                print("ERROROROROR: WRONG NAME SENT BACK")
             CLIENT_LIST = eval(receive_client_list_from_server(client_socket))
             client_socket.close()
 
@@ -145,11 +158,12 @@ def update_download_client_list():
     global CLIENT_LIST
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((HOST, PORT))
+        print("CLIENTID")
         send_single_message_to_server(client_socket, str(2)+str(CLIENT_ID))
         CLIENT_LIST = eval(receive_client_list_from_server(client_socket))
         files = download_files_from_server(client_socket)
         client_socket.close()
-        return files
+        return files, CLIENT_LIST
 
 
 # setup the socket for sending files and call the respective function

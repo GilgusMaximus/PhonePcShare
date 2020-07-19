@@ -10,7 +10,7 @@ PORT = 5555
 BUFF_SIZE = 2048
 
 stored_files = []  # each client gets an array with all it's associated files
-active_clients = []  # each element is a list representing an client with the following structure: [Id, Ip, Dirty]
+active_clients = []  # each element is a list representing an client with the following structure: [Id, Ip, Name]
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serversocket.bind((hostName, PORT))
@@ -103,11 +103,13 @@ def register_client(csocket, number_registered_clients):
     registered_clients.write(str(number_registered_clients))
     registered_clients.close()
 
-    csocket.send(number_registered_clients.to_bytes(1, byteorder='big'))
+    send_single_message_to_client(csocket, str(number_registered_clients))
+    device_name = receive_message_from_client(csocket)
+    send_single_message_to_client(csocket, device_name)
     print(csocket.getsockname()[0])
-    active_clients.append([number_registered_clients, csocket.getsockname()[0], False])
+    active_clients.append([number_registered_clients, csocket.getsockname()[0], device_name])
 
-    print("New client registered. Currently Active Client:", str(active_clients))
+    print("New client with name", device_name, "registered. Currently Active Client:", str(active_clients))
     return number_registered_clients
 
 

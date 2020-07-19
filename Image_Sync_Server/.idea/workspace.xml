@@ -3,8 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="83f76396-f3c8-4de9-89d3-8dc1056cbe81" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client_files/id.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/files/registered.txt" beforeDir="false" afterPath="$PROJECT_DIR$/files/registered.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/client_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/client_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,6 +101,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="reader" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Image_Sync_Server" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/reader.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="server" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Image_Sync_Server" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -125,6 +150,7 @@
         <item itemvalue="Python.client_gui" />
         <item itemvalue="Python.server" />
         <item itemvalue="Python.client" />
+        <item itemvalue="Python.reader" />
       </list>
     </recent_temporary>
   </component>
@@ -170,6 +196,9 @@
       <workItem from="1594234146649" duration="807000" />
       <workItem from="1594237133474" duration="2052000" />
       <workItem from="1594411957192" duration="2312000" />
+      <workItem from="1594795055233" duration="1012000" />
+      <workItem from="1594797377339" duration="371000" />
+      <workItem from="1595186936700" duration="4519000" />
     </task>
     <servers />
   </component>
@@ -193,38 +222,38 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="740" y="295" width="999" height="646" key="FileChooserDialogImpl/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594045673244" />
-    <state width="1877" height="313" key="GridCell.Tab.0.bottom" timestamp="1594414271878">
+    <state width="1877" height="250" key="GridCell.Tab.0.bottom" timestamp="1595191490950">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.0.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.0.center" timestamp="1594414271878">
+    <state width="1877" height="250" key="GridCell.Tab.0.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490950" />
+    <state width="1877" height="250" key="GridCell.Tab.0.center" timestamp="1595191490950">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.0.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.0.left" timestamp="1594414271877">
+    <state width="1877" height="250" key="GridCell.Tab.0.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490950" />
+    <state width="1877" height="250" key="GridCell.Tab.0.left" timestamp="1595191490950">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.0.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271877" />
-    <state width="1877" height="313" key="GridCell.Tab.0.right" timestamp="1594414271878">
+    <state width="1877" height="250" key="GridCell.Tab.0.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490950" />
+    <state width="1877" height="250" key="GridCell.Tab.0.right" timestamp="1595191490950">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.0.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.1.bottom" timestamp="1594414271878">
+    <state width="1877" height="250" key="GridCell.Tab.0.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490950" />
+    <state width="1877" height="313" key="GridCell.Tab.1.bottom" timestamp="1595191490945">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.1.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.1.center" timestamp="1594414271878">
+    <state width="1877" height="313" key="GridCell.Tab.1.bottom/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490945" />
+    <state width="1877" height="313" key="GridCell.Tab.1.center" timestamp="1595191490945">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.1.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.1.left" timestamp="1594414271878">
+    <state width="1877" height="313" key="GridCell.Tab.1.center/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490945" />
+    <state width="1877" height="313" key="GridCell.Tab.1.left" timestamp="1595191490945">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.1.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
-    <state width="1877" height="313" key="GridCell.Tab.1.right" timestamp="1594414271878">
+    <state width="1877" height="313" key="GridCell.Tab.1.left/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490945" />
+    <state width="1877" height="313" key="GridCell.Tab.1.right" timestamp="1595191490945">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
-    <state width="1877" height="313" key="GridCell.Tab.1.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1594414271878" />
+    <state width="1877" height="313" key="GridCell.Tab.1.right/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1595191490945" />
     <state x="461" y="185" key="SettingsEditor" timestamp="1594045791399">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
@@ -233,7 +262,6 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="636" y="364" width="647" height="350" key="com.intellij.ide.util.TipDialog/0.0.1920.1080/1920.0.1024.1280@0.0.1920.1080" timestamp="1593971969350" />
-    <state x="636" y="364" key="com.intellij.ide.util.TipDialog/0.0.1920.1080/1920.0.1024.1280@1920.0.1024.1280" timestamp="1586104418845" />
     <state x="636" y="364" key="com.intellij.ide.util.TipDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1592133362231" />
     <state x="623" y="235" width="672" height="678" key="search.everywhere.popup" timestamp="1593889036105">
       <screen x="0" y="0" width="1920" height="1080" />
@@ -252,8 +280,9 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Image_Sync_Server$server.coverage" NAME="server Coverage Results" MODIFIED="1594414189176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/Image_Sync_Server$client_gui.coverage" NAME="client_gui Coverage Results" MODIFIED="1594414240778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/Image_Sync_Server$client.coverage" NAME="client Coverage Results" MODIFIED="1594413361030" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/Image_Sync_Server$reader.coverage" NAME="reader Coverage Results" MODIFIED="1594797506355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/Image_Sync_Server$server.coverage" NAME="server Coverage Results" MODIFIED="1595191408304" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/Image_Sync_Server$client_gui.coverage" NAME="client_gui Coverage Results" MODIFIED="1595191411248" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/Image_Sync_Server$client.coverage" NAME="client Coverage Results" MODIFIED="1595190739201" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>
