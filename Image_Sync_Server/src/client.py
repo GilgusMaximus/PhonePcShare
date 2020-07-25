@@ -1,5 +1,6 @@
 import socket
 import os
+import struct
 
 ID_PATH = "id.txt"
 
@@ -10,6 +11,7 @@ CLIENT_ID = 1
 CLIENT_LIST = []
 CLIENT_FILES_STORE_LOCATION = "../client_files/"
 CLIENT_ALREADY_REGISTERED = False
+
 
 def receive_messages_from_server(c_socket):
     server_data_decoded = ""
@@ -24,9 +26,26 @@ def receive_messages_from_server(c_socket):
     return server_data_decoded
 
 
+def receive_messages_from_server_raw(c_socket):
+    server_data_decoded = []
+    server_data_raw = c_socket.recv(BUFFER_SIZE)
+    # receive the number of files
+    while server_data_raw:
+        server_data_decoded += server_data_raw.decode()
+        if len(server_data_raw) < BUFFER_SIZE:
+            # end of data
+            break
+        server_data_raw = c_socket.recv(BUFFER_SIZE)
+    return server_data_decoded
+
+
 # takes a string and then encodes the string in order to send it to the server
 def send_single_message_to_server(c_socket, message):
     c_socket.sendall(message.encode())
+
+
+def send_single_message_to_server_raw(c_socket, message):
+    c_socket.sendall(message)
 
 
 def receive_client_list_from_server(c_socket):
@@ -115,42 +134,57 @@ def send_files_to_server(c_socket, filepaths, filenames, receiver_id):
 
 
 # TODO make it writing a settings file
-def write_id_file(c_id):
+def write_id_file(c_id, c_name):
     id_file = open(CLIENT_FILES_STORE_LOCATION+ID_PATH, mode='w+')
-    id_file.write(c_id)
+    id_file.writelines(c_id)
+    id_file.writelines(c_name)
     id_file.close()
 
 
-#####################################################################################################################
-#                                           Start of the main routine
-#####################################################################################################################
+# send the server the new name of the device
+def update_device_name(new_device_name):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((HOST, PORT))
+        send_single_message_to_server(client_socket, "3"+str(CLIENT_ID))
+        send_single_message_to_server(client_socket, new_device_name)
+        message = receive_messages_from_server(client_socket)
+        if message[0] == "0" and message[1:] == new_device_name:
+            write_id_file(CLIENT_ID, new_device_name)
+        return
+
+
 # read the client id or register the client at the server
 def setup_client(device_name):
     global CLIENT_ID
     global CLIENT_LIST
     if os.path.exists(CLIENT_FILES_STORE_LOCATION+ID_PATH):
         client_id_file = open(CLIENT_FILES_STORE_LOCATION+ID_PATH, mode='r')
-        read_string = client_id_file.read(1)
+        client_id_read = client_id_file.readline()
+        client_name_read = client_id_file.readline()
+
         client_id_file.close()
         # check if the read file was empty or not
-        if read_string == "":
+        if client_id_read == "" or client_name_read == "":
             # if the file was empty, no id was read -> therefore delete the file and restart the setup
             os.remove(CLIENT_FILES_STORE_LOCATION+ID_PATH)
             setup_client(device_name)
+            return device_name
         else:
-            CLIENT_ID = int(read_string)
+            CLIENT_ID = int(client_id_read)
+            return client_name_read
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((HOST, PORT))
-            send_single_message_to_server(client_socket, str(0)+str(1))
+            send_single_message_to_server(client_socket, (str(0)+str(1)))
             CLIENT_ID = receive_messages_from_server(client_socket)
             print("IDIDIDIDI:", CLIENT_ID)
-            write_id_file(CLIENT_ID)
+            write_id_file(CLIENT_ID, device_name)
             send_single_message_to_server(client_socket, device_name)
             if receive_messages_from_server(client_socket) != device_name:
                 print("ERROROROROR: WRONG NAME SENT BACK")
             CLIENT_LIST = eval(receive_client_list_from_server(client_socket))
             client_socket.close()
+        return device_name
 
 
 # function used to check whether files are available for download and whether new clients are available
@@ -158,9 +192,12 @@ def update_download_client_list():
     global CLIENT_LIST
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((HOST, PORT))
-        print("CLIENTID")
-        send_single_message_to_server(client_socket, str(2)+str(CLIENT_ID))
+        # pack the action and the own id as raw bytes because a 2 decimal id will use > 1 Byte if converted to string
+        s = struct.pack("!2B", 2, CLIENT_ID)
+        send_single_message_to_server_raw(client_socket, s)
+        # receive the list of all client that registered on the server
         CLIENT_LIST = eval(receive_client_list_from_server(client_socket))
+        # download possible waiting files
         files = download_files_from_server(client_socket)
         client_socket.close()
         return files, CLIENT_LIST
@@ -173,28 +210,3 @@ def file_send_setup(filepaths, filenames ,receiver_id):
         send_single_message_to_server(client_socket, str(1)+str(CLIENT_ID))
         send_files_to_server(client_socket, filepaths=filepaths, filenames=filenames, receiver_id=receiver_id)
         client_socket.close()
-
-
-# with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-#     client_socket.connect((HOST, PORT))
-#     # did the client already connect to the server and save an assigned id?
-#     if CLIENT_ID == -1:
-#         # no -> send server the information that a new client id must be issued
-#         send_string = str(0) + str(1)
-#         send_single_message_to_server(client_socket, send_string)
-#         CLIENT_ID = int.from_bytes(client_socket.recv(1), byteorder="big")
-#     else:
-#         # yes -> send the server the information that the client already registered as well as the assigned id
-#         send_string = str(1) + str(CLIENT_ID)
-#         send_single_message_to_server(client_socket, send_string)
-#         CLIENT_ALREADY_REGISTERED = True
-#
-#     client_list = eval(receive_client_list_from_server(client_socket))
-#     print("Client list:", client_list)
-#     if CLIENT_ALREADY_REGISTERED:
-#         download_files_from_server(client_socket)
-#
-#     # send the server the files
-#     send_files_to_server(client_socket, ["../test.txt"], ["test23224.txt"], 1)
-
-

@@ -1,6 +1,6 @@
 import socket as socket
 import os
-
+import struct
 
 hostName = '127.0.0.1'
 REGISTERED_FILE = "../files/registered.txt"
@@ -17,8 +17,9 @@ serversocket.bind((hostName, PORT))
 
 serversocket.listen(5)
 
+
 # receive a single message from a client and decode it for the calling function
-def receive_message_from_client(c_socket):
+def receive_message_from_client(c_socket, opt_buff_size=BUFF_SIZE):
     client_data_decoded = ""
     client_data_raw = c_socket.recv(BUFF_SIZE)
     # receive the number of files
@@ -27,14 +28,36 @@ def receive_message_from_client(c_socket):
         if len(client_data_raw) < BUFF_SIZE:
             # end of data
             break
-        client_data_raw = c_socket.recv(BUFF_SIZE)
+        client_data_raw = c_socket.recv(opt_buff_size)
     print("> Received message from client:", client_data_decoded)
     return client_data_decoded
+
+
+def receive_message_from_client_raw(c_socket, receive_length=BUFF_SIZE):
+    client_sent_bytes = []
+    current_rec_client_data = c_socket.recv(BUFF_SIZE)
+    while current_rec_client_data:
+        # unpack the number of receive bytes from big endian to little endian
+        client_bytes = struct.unpack("!"+str(len(current_rec_client_data))+"B", current_rec_client_data)
+        # debugging text
+        print("Received", str(len(client_bytes)), "Raw Bytes from client:", client_bytes)
+        # append the bytes to the return array
+        client_sent_bytes += client_bytes
+        if len(current_rec_client_data) < BUFF_SIZE:
+            # end of data
+            break
+        current_rec_client_data = c_socket.recv(BUFF_SIZE)
+
+    return client_sent_bytes
 
 
 # takes a string and then encodes the string in order to send it to the server
 def send_single_message_to_client(c_socket, message):
     c_socket.sendall(message.encode())
+
+
+def send_single_message_to_client_raw(c_socket, message):
+    c_socket.sendall(struct.pack('B'), message)
 
 
 # reads the file with the number of registered users
@@ -47,7 +70,7 @@ def read_registered_file():
         number_stored_clients = int(registered_clients.read(3))
         registered_clients.close()
         # create as many file lists as there are total registered users
-        for i in range(0, number_stored_clients):
+        for i in range(0, number_stored_clients+1):
             stored_files.append([])
         print("...done reading registered file.")
     else:
@@ -71,7 +94,7 @@ def read_index_file():
         # read all lines
         while index_file:
             print("a")
-            # split the lines for white space -> [0] is the id of the receiver and [1] is the file, an
+            # split the lines for white space -> [0] is the id of the receiver and [1] is the file
             line = index_file.readline()
             if line != "":
                 text = line.split()
@@ -202,11 +225,19 @@ def send_stored_files(client_socket, c_id):
 
 # sends the client the current list of clients available
 def send_all_registered_devices(client_socket):
+
     clients_array = str(0) + str(active_clients)
     print(clients_array)
     send_single_message_to_client(client_socket, clients_array)
     return
 
+
+def change_name_of_client(client_socket, client_id):
+    print("Name changed")
+    name = receive_message_from_client(client_socket)
+    active_clients[int(client_id)][2] = name
+    print("NEW NAME OF CLIENT: ", name)
+    send_single_message_to_client(client_socket, str(0) + name)
 
 number_registered_clients = read_registered_file()
 read_index_file()
@@ -215,28 +246,39 @@ while True:
     (clientsocket, address) = serversocket.accept()
     with clientsocket:
         print("Found a client. Setting up connection")
+        c_initial_send = receive_message_from_client_raw(clientsocket, receive_length=2)
         # what kind of interaction
-        c_initial_send = receive_message_from_client(clientsocket)
-        initial_send = int(c_initial_send[0])
-        client_id = int(c_initial_send[1])
-        print("Initial byte", initial_send)
+        client_sent_action = c_initial_send[0]
+        # the client's id
+        client_id = c_initial_send[1]
 
-        if int(initial_send) == 0:
+        if client_sent_action > 3 or client_sent_action < 0:
+            print("ERROR: Client sent action", client_sent_action, ", while the server only implements 3 actions")
+        if client_id > len(active_clients) or client_id < 0:
+            print("ERROR: Client sent id", client_sent_action, ", which is not valid.")
+
+        print("Action Byte:", client_sent_action)
+        print("INITIAL ID", client_id)
+
+        if int(client_sent_action) == 0:
             # register
             number_registered_clients = register_client(clientsocket, number_registered_clients)
             send_all_registered_devices(clientsocket)
 
-        elif int(initial_send) == 1:
+        elif int(client_sent_action) == 1:
             # receive files
-            #send_all_registered_devices(clientsocket)
-
-            #client_file_request = int(receive_message_from_client(clientsocket))
-            #if client_file_request == 0:
-            #    send_stored_files(clientsocket, client_id)
+            send_all_registered_devices(clientsocket)
+            client_file_request = int(receive_message_from_client(clientsocket))
+            if client_file_request == 0:
+                send_stored_files(clientsocket, client_id)
             receive_files_from_client(clientsocket)
-        elif int(initial_send) == 2:
+        elif int(client_sent_action) == 2:
             # send files
             send_all_registered_devices(clientsocket)
             send_stored_files(clientsocket, client_id)
+        elif int(client_sent_action) == 3:
+            # change name of client
+            change_name_of_client(clientsocket, client_id)
+
         clientsocket.close()
         write_index_file()

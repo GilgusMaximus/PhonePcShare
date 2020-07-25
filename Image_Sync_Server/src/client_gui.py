@@ -2,11 +2,16 @@ import threading
 import tkinter as tk
 import time
 import src.client as client
+import random
 from tkinter import filedialog
+
+random.seed(time.time())
 
 USER_DEFINED_STORE_PATH = "../client_files/"
 WAIT_TO_SYNC_TIME = 10
 SEND_PRESSED = False
+NAME_CHANGED = False
+BASE_WIDGET_COLOR = None
 
 current_selected_client = -1
 selected_files_to_send = []
@@ -32,11 +37,20 @@ def send_button_clicked(event):
 # function that is run in a new thread
 def run(lb_tops):
     global SEND_PRESSED
+    global NAME_CHANGED
+    global BASE_WIDGET_COLOR
+    global nameEntered
+    global NAME_CHANGED
     print(lb_tops.size())
     time_counter = WAIT_TO_SYNC_TIME
-    client.setup_client("Dieter")
+    # setup the client and provide a random number as name - if the client already saved a name, it is stored in the id file
+    name = client.setup_client(str(random.randrange(0, 1000)))
+    # remove the default name from the widget and instead display the chosen name
+    nameEntered.delete(0, 'end')
+    nameEntered.insert(0, name)
     while True:
         print("running...")
+        nameEntered.configure(bg=BASE_WIDGET_COLOR)
         # check for incoming files
         if time_counter == WAIT_TO_SYNC_TIME:
             time_counter = 0
@@ -50,12 +64,19 @@ def run(lb_tops):
         else:
             if SEND_PRESSED:
                 print("Pressed send")
-                if current_selected_client > 0 and len(selected_file_to_send_names) == len(selected_files_to_send) > 0:
-                    print("Passed checK")
-                    client.file_send_setup(selected_files_to_send, selected_file_to_send_names, current_selected_client)
-                clear_all_elements_from_list(lb_right)
-                selected_files_to_send.clear()
+                if nameEntered.get() == "Please add a name...":
+                    nameEntered.configure(bg="red")
+                else:
+                    if current_selected_client > 0 and len(selected_file_to_send_names) == len(selected_files_to_send) > 0:
+                        print("Passed checK")
+                        client.file_send_setup(selected_files_to_send, selected_file_to_send_names, current_selected_client)
+                    clear_all_elements_from_list(lb_right)
+                    selected_files_to_send.clear()
                 SEND_PRESSED = False
+            elif NAME_CHANGED:
+                print("NAME CHANGING")
+                client.update_device_name(nameEntered.get())
+                NAME_CHANGED = False
             time_counter += 1
             time.sleep(1)
 
@@ -103,6 +124,10 @@ def select_recipient(event):
         current_selected_recipient = index
 
 
+def name_changed_and_unfocused():
+    global NAME_CHANGED
+    NAME_CHANGED = True
+
 window = tk.Tk()
 window.title("PcPhoneShare-Client")
 window.geometry("400x600+0+0")
@@ -134,7 +159,14 @@ f4.rowconfigure(1, weight=1)
 
 
 send_button = tk.Button(f4, text="Send files")
-send_button.grid(column=0, row=0, sticky=tk.W+tk.E+tk.S)
+send_button.grid(column=0, row=1, sticky=tk.W+tk.E+tk.S)
+
+nameEntered = tk.Entry(f4, width=15, validate="focusout", validatecommand=name_changed_and_unfocused)
+nameEntered.insert(0, "Please add a name...")
+nameEntered.grid(column=0, row=0, sticky=tk.W+tk.E+tk.S)
+print("VAR: ", nameEntered.get())
+BASE_WIDGET_COLOR = nameEntered["bg"]
+#name_box.grid(column=0, row=0, sticky=tk.W)
 
 f1 = tk.Frame(window)
 f2 = tk.Frame(window)
@@ -142,6 +174,7 @@ lb_right = tk.Listbox(f2, bd=0, highlightcolor="red", highlightthickness=0)
 top_label = tk.Label(f1, text="Select a recipient.", font=("Arial", 10), background='green')
 lb_top = tk.Listbox(f1, bd=0, highlightcolor="red", highlightthickness=0, )
 mid_label = tk.Label(f2, text="Click here to add files", font=("Arial", 10), background='green')
+
 
 
 send_button.bind("<ButtonRelease-1>", send_button_clicked)
