@@ -59,18 +59,33 @@ def send_single_message_to_client(c_socket, message):
 def send_single_message_to_client_raw(c_socket, message):
     c_socket.sendall(struct.pack('B'), message)
 
+# the registered file contains 2 lines: number of users for the id and the active_user array
+def write_registered_file():
+    registered_clients = open(REGISTERED_FILE, mode='w')
+    registered_clients.write(str(number_registered_clients) + '\n')
+    registered_clients.writelines(str(active_clients))
+    registered_clients.close()
 
 # reads the file with the number of registered users
 def read_registered_file():
+    global active_clients
     # Does the file already exist?
     if os.path.exists(REGISTERED_FILE):
         # yes -> read all users as well as the total number of users
         print("Registered File exists. reading...")
         registered_clients = open(REGISTERED_FILE, mode='r')
-        number_stored_clients = int(registered_clients.read(3))
+        number_string = registered_clients.readline()
+        # check if nothing is written, so create a new file (unsafe because deleting the line deletes all registered clients automatically)
+        if number_string == "":
+            os.remove(REGISTERED_FILE)
+        number_stored_clients = int(number_string)
+
+        # evaluates the written array in the registered file directly (unsafe but functional)
+        if number_stored_clients != 0:
+            active_clients = eval(registered_clients.readline())
         registered_clients.close()
-        # create as many file lists as there are total registered users
-        for i in range(0, number_stored_clients+1):
+        # add the required number of file pointers
+        for i in range(0, len(active_clients)):
             stored_files.append([])
         print("...done reading registered file.")
     else:
@@ -122,16 +137,14 @@ def register_client(csocket, number_registered_clients):
     print("Registering clients", number_registered_clients)
     # increase number of registered clients so we know which ids to expect
     number_registered_clients += 1
-    registered_clients = open("../files/registered.txt", mode='w')
-    registered_clients.write(str(number_registered_clients))
-    registered_clients.close()
-
     send_single_message_to_client(csocket, str(number_registered_clients))
     device_name = receive_message_from_client(csocket)
+    active_clients.append([number_registered_clients, csocket.getsockname()[0], device_name])
+    stored_files.append([])
+    write_registered_file()
+
     send_single_message_to_client(csocket, device_name)
     print(csocket.getsockname()[0])
-    active_clients.append([number_registered_clients, csocket.getsockname()[0], device_name])
-
     print("New client with name", device_name, "registered. Currently Active Client:", str(active_clients))
     return number_registered_clients
 
@@ -161,8 +174,8 @@ def receive_files_from_client(c_socket):
     if int(client_send_info[0]) != 1:
         print("ERROR: Client sent wrong initiation. Closing client.")
         c_socket.close()
-
-    file_receiver_id = int(client_send_info[1])
+    # subtract 1 to match internal ids (which are 1 behind, because noone can become id 0)
+    file_receiver_id = int(client_send_info[1])-1
     if file_receiver_id > number_registered_clients:
         print("ERROR: Client sent wrong receiver ID. ID does not exist. Closing client.")
         c_socket.close()
@@ -237,6 +250,7 @@ def change_name_of_client(client_socket, client_id):
     name = receive_message_from_client(client_socket)
     active_clients[int(client_id)][2] = name
     print("NEW NAME OF CLIENT: ", name)
+    write_registered_file()
     send_single_message_to_client(client_socket, str(0) + name)
 
 number_registered_clients = read_registered_file()
@@ -249,8 +263,8 @@ while True:
         c_initial_send = receive_message_from_client_raw(clientsocket, receive_length=2)
         # what kind of interaction
         client_sent_action = c_initial_send[0]
-        # the client's id
-        client_id = c_initial_send[1]
+        # the client's id -1 for internal array setup
+        client_id = c_initial_send[1]-1
 
         if client_sent_action > 3 or client_sent_action < 0:
             print("ERROR: Client sent action", client_sent_action, ", while the server only implements 3 actions")

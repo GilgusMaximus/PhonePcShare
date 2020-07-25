@@ -136,7 +136,7 @@ def send_files_to_server(c_socket, filepaths, filenames, receiver_id):
 # TODO make it writing a settings file
 def write_id_file(c_id, c_name):
     id_file = open(CLIENT_FILES_STORE_LOCATION+ID_PATH, mode='w+')
-    id_file.writelines(c_id)
+    id_file.writelines(str(c_id)+"\n")
     id_file.writelines(c_name)
     id_file.close()
 
@@ -145,7 +145,8 @@ def write_id_file(c_id, c_name):
 def update_device_name(new_device_name):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((HOST, PORT))
-        send_single_message_to_server(client_socket, "3"+str(CLIENT_ID))
+        device_change_initiator = struct.pack("!2B", 3, CLIENT_ID)
+        send_single_message_to_server_raw(client_socket, device_change_initiator)
         send_single_message_to_server(client_socket, new_device_name)
         message = receive_messages_from_server(client_socket)
         if message[0] == "0" and message[1:] == new_device_name:
@@ -155,6 +156,7 @@ def update_device_name(new_device_name):
 
 # read the client id or register the client at the server
 def setup_client(device_name):
+    print("SETUP NAME", device_name)
     global CLIENT_ID
     global CLIENT_LIST
     if os.path.exists(CLIENT_FILES_STORE_LOCATION+ID_PATH):
@@ -175,8 +177,9 @@ def setup_client(device_name):
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
             client_socket.connect((HOST, PORT))
-            send_single_message_to_server(client_socket, (str(0)+str(1)))
-            CLIENT_ID = receive_messages_from_server(client_socket)
+            register_data = struct.pack("!2B", 0, 1)
+            send_single_message_to_server_raw(client_socket, register_data)
+            CLIENT_ID = int(receive_messages_from_server(client_socket))
             print("IDIDIDIDI:", CLIENT_ID)
             write_id_file(CLIENT_ID, device_name)
             send_single_message_to_server(client_socket, device_name)
@@ -190,6 +193,7 @@ def setup_client(device_name):
 # function used to check whether files are available for download and whether new clients are available
 def update_download_client_list():
     global CLIENT_LIST
+    global CLIENT_ID
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((HOST, PORT))
         # pack the action and the own id as raw bytes because a 2 decimal id will use > 1 Byte if converted to string
@@ -205,8 +209,10 @@ def update_download_client_list():
 
 # setup the socket for sending files and call the respective function
 def file_send_setup(filepaths, filenames ,receiver_id):
+    global CLIENT_ID
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
         client_socket.connect((HOST, PORT))
-        send_single_message_to_server(client_socket, str(1)+str(CLIENT_ID))
+        file_send_initiator = struct.pack("!2B", 1, CLIENT_ID)
+        send_single_message_to_server_raw(client_socket, file_send_initiator)
         send_files_to_server(client_socket, filepaths=filepaths, filenames=filenames, receiver_id=receiver_id)
         client_socket.close()

@@ -46,6 +46,7 @@ def run(lb_tops):
     # setup the client and provide a random number as name - if the client already saved a name, it is stored in the id file
     name = client.setup_client(str(random.randrange(0, 1000)))
     # remove the default name from the widget and instead display the chosen name
+    print("CID IS", client.CLIENT_ID)
     nameEntered.delete(0, 'end')
     nameEntered.insert(0, name)
     while True:
@@ -125,8 +126,11 @@ def select_recipient(event):
 
 
 def name_changed_and_unfocused():
+    print("DEFOCUSED")
     global NAME_CHANGED
     NAME_CHANGED = True
+    # required to reset the focus function and allow more than 1 time of name change
+    return True
 
 window = tk.Tk()
 window.title("PcPhoneShare-Client")
